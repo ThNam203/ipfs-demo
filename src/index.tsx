@@ -3,9 +3,6 @@ import './index.css';
 import SharingFileScreen from './App';
 import { Toaster } from './components/ui/toaster';
 
-console.log(process.env.REACT_APP_SERVER_URL);
-console.log(process.env.REACT_APP_WS_URL);
-
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

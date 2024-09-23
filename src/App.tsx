@@ -31,7 +31,7 @@ export default function Component() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await fetch(process.env.REACT_APP_SERVER_URL + "/files");
+            const response = await fetch("http://18.139.83.35:8000/files");
             if (response.ok) {
                 try {
                     const data = await response.json();
@@ -49,7 +49,7 @@ export default function Component() {
     }, []);
 
     useEffect(() => {
-        webSocket.current = new WebSocket(process.env.REACT_APP_WS_URL + "/socket");
+        webSocket.current = new WebSocket("ws://18.139.83.35:8000/socket");
 
         webSocket.current.onopen = () => {
             console.log("WebSocket connection established.");
@@ -162,7 +162,7 @@ export default function Component() {
 
         try {
             setIsUploading(true);
-            const response = await fetch(process.env.REACT_APP_SERVER_URL + "/upload", {
+            const response = await fetch("http://18.139.83.35:8000/upload", {
                 method: "POST",
                 body: formData,
             });
