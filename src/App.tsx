@@ -31,7 +31,7 @@ export default function Component() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await fetch("http://localhost:8000/files");
+            const response = await fetch(process.env.SERVER_URL + "/files");
             if (response.ok) {
                 try {
                     const data = await response.json();
@@ -49,7 +49,7 @@ export default function Component() {
     }, []);
 
     useEffect(() => {
-        webSocket.current = new WebSocket("ws://localhost:8000/socket");
+        webSocket.current = new WebSocket(process.env.WS_URL + "/socket");
 
         webSocket.current.onopen = () => {
             console.log("WebSocket connection established.");
@@ -162,7 +162,7 @@ export default function Component() {
 
         try {
             setIsUploading(true);
-            const response = await fetch("http://localhost:8000/upload", {
+            const response = await fetch(process.env.SERVER_URL + "/upload", {
                 method: "POST",
                 body: formData,
             });
@@ -287,7 +287,7 @@ export default function Component() {
                                     size="icon"
                                     onClick={() => {}}
                                 >
-                                    <a href={`http://localhost:8080${file.cid}`} download={file.filename}><Download className="h-5 w-5"/></a>
+                                    <a href={`https://ipfs.io/ + ${file.cid}`} download={file.filename}><Download className="h-5 w-5"/></a>
                                     <span className="sr-only">Download</span>
                                 </Button>
                             </li>
