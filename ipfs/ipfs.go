@@ -95,6 +95,8 @@ func createIPFSNode(ctx context.Context, repoPath string) (*iface.CoreAPI, *core
 		return nil, nil, err
 	}
 
+	repo.SetConfigKey("Addresses.Gateway", config.Strings{"/ip4/0.0.0.0/tcp/8080"})
+
 	nodeOptions := &core.BuildCfg{
 		Online:  true,
 		Routing: libp2p.DHTOption,
@@ -102,7 +104,7 @@ func createIPFSNode(ctx context.Context, repoPath string) (*iface.CoreAPI, *core
 	}
 
 	node, err := core.NewNode(ctx, nodeOptions)
-	// node.IsDaemon = true
+	node.IsDaemon = true
 
 	if err != nil {
 		return nil, nil, err
