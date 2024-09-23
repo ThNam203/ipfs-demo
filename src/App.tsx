@@ -33,7 +33,7 @@ export default function Component() {
         const fetchData = async () => {
             try {
 
-                const response = await fetch("https://18.139.83.35:8000/files");
+                const response = await fetch("http://18.139.83.35:8000/files");
                 if (response.ok) {
                     try {
                         const data = await response.json();
@@ -167,7 +167,7 @@ export default function Component() {
 
         try {
             setIsUploading(true);
-            const response = await fetch("https://18.139.83.35:8000/upload", {
+            const response = await fetch("http://18.139.83.35:8000/upload", {
                 method: "POST",
                 body: formData,
             });
