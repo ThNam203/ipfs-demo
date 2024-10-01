@@ -23,16 +23,16 @@ import (
 )
 
 type IPFSStorage struct {
-	ipfsApi iface.CoreAPI
-	node    *core.IpfsNode
-	ctx     context.Context
+	ipfsApi  iface.CoreAPI
+	node     *core.IpfsNode
+	ctx      context.Context
+	publicIP string
 }
 
-func NewIPFSStorage() *IPFSStorage {
-	ctx := context.Background()
-
+func NewIPFSStorage(ctx context.Context, publicIP string) *IPFSStorage {
 	ipfsStorage := &IPFSStorage{
-		ctx: ctx,
+		ctx:      ctx,
+		publicIP: publicIP,
 	}
 
 	ipfsStorage.setup()
@@ -89,7 +89,7 @@ func getUnixfsNode(path string) (files.Node, error) {
 	return f, nil
 }
 
-func createIPFSNode(ctx context.Context, repoPath string) (*iface.CoreAPI, *core.IpfsNode, error) {
+func createIPFSNode(ctx context.Context, publicIP string, repoPath string) (*iface.CoreAPI, *core.IpfsNode, error) {
 	repo, err := fsrepo.Open(repoPath)
 	if err != nil {
 		return nil, nil, err
@@ -180,7 +180,7 @@ func (s *IPFSStorage) spawnEphemeral() (*iface.CoreAPI, *core.IpfsNode, error) {
 		return nil, nil, fmt.Errorf("failed to create temp repo: %s", err)
 	}
 
-	api, node, err := createIPFSNode(s.ctx, repoPath)
+	api, node, err := createIPFSNode(s.ctx, s.publicIP, repoPath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create ipfs node: %s", err)
 	}
@@ -231,12 +231,7 @@ func (s *IPFSStorage) goOnlineIPFSNode() {
 		"/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa",
 		"/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb",
 		"/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt",
-
-		// IPFS Cluster Pinning nodes
-		"/ip4/138.201.67.219/tcp/4001/p2p/QmUd6zHcbkbcs7SMxwLs48qZVX3vpcM8errYS7xEczwRMA",
-
-		"/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",      // mars.i.ipfs.io
-		"/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ", // mars.i.ipfs.io
+		"/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
 	}
 
 	go s.connectToPeers(bootstrapNodes)

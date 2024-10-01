@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -244,7 +245,8 @@ func setUpFolders() {
 func main() {
 	setUpFolders()
 
-	ipfsStorage = NewIPFSStorage()
+	ctx := context.Background()
+	ipfsStorage = NewIPFSStorage(ctx, "123.123.123.123")
 	go broadcastFiles()
 
 	// Set up the HTTP server and upload route
