@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	ipfslite "ipfs-demo/ipfs"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/ipfs/go-cid"
 	"github.com/rs/cors"
 )
 
@@ -29,6 +31,28 @@ var (
 	broadcastChan = make(chan FileInfo)            // Channel for broadcasting file info
 	mu            sync.Mutex                       // To manage access to clients map
 )
+
+func getFileFromNode(w http.ResponseWriter, r *http.Request) {
+	fileCid := r.PathValue("fileCid")
+	c, _ := cid.Decode(fileCid)
+	rsc, err := ipfsNode.GetFile(r.Context(), c)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer rsc.Close()
+
+	// Set headers to force download
+	w.Header().Set("Content-Disposition", "attachment; filename="+fileCid)
+	w.Header().Set("Content-Type", "application/octet-stream")
+
+	// Stream the file to the client
+	_, err = io.Copy(w, rsc)
+	if err != nil {
+		http.Error(w, "Failed to write file to response", http.StatusInternalServerError)
+	}
+}
 
 func getFileInfosHandler(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open("uploaded_files.txt")
@@ -262,6 +286,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/upload", uploadHandler)
 	mux.HandleFunc("/files", getFileInfosHandler)
+	mux.HandleFunc("/files/{fileCid}", getFileFromNode)
 	mux.HandleFunc("/socket", wsHandler)
 	handler := cors.Default().Handler(mux)
 

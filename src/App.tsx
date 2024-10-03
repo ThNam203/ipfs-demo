@@ -22,7 +22,7 @@ type UploadedFile = {
     cid: string;
 };
 
-const serverIPv4 = "54.169.47.36"
+const serverIPv4 = "localhost"
 
 export default function Component() {
     const [isUploading, setIsUploading] = useState(false);
@@ -294,7 +294,7 @@ export default function Component() {
                                     size="icon"
                                     onClick={() => {}}
                                 >
-                                    <a href={`http://${serverIPv4}:8080${file.cid}`} download={file.filename}><Download className="h-5 w-5"/></a>
+                                    <a href={`http://${serverIPv4}:8000/files/${file.cid}`} target="_blank"><Download className="h-5 w-5"/></a>
                                     <span className="sr-only">Download</span>
                                 </Button>
                             </li>
