@@ -45,6 +45,10 @@ type Peer struct {
 	reprovider      provider.System
 }
 
+func (p *Peer) GetHost() host.Host {
+	return p.host
+}
+
 func New(
 	ctx context.Context,
 	datastore datastore.Batching,

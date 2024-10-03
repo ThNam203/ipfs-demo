@@ -19,6 +19,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/routing"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
+	"github.com/multiformats/go-multiaddr"
 )
 
 // DefaultBootstrapPeers returns the default bootstrap peers (for use
@@ -64,18 +65,22 @@ func SetupLibp2p(
 		panic(err)
 	}
 
+	addr1, _ := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4001")
+	addr2, _ := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic-v1")
+
+	addrs := []multiaddr.Multiaddr{addr1, addr2}
+
 	opts := []libp2p.Option{
 		libp2p.Identity(priv),
-		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", 4001), fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic-v1", 4001)), // a UDP endpoint for the QUIC transport
-
-		libp2p.NATPortMap(),
+		libp2p.ListenAddrs(addrs...),
 		libp2p.ConnectionManager(connMgr),
 		libp2p.DefaultTransports,
+		//libp2p.NATPortMap(),
 		libp2p.Routing(func(h host.Host) (routing.PeerRouting, error) {
 			ddht, err = newDHT(ctx, h, ds)
 			return ddht, err
 		}),
-		libp2p.EnableNATService(),
+		//libp2p.EnableNATService(),
 	}
 
 	h, err := libp2p.New(opts...)

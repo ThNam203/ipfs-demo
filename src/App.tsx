@@ -22,7 +22,7 @@ type UploadedFile = {
     cid: string;
 };
 
-const serverIPv4 = "13.215.163.6"
+const serverIPv4 = "54.169.47.36"
 
 export default function Component() {
     const [isUploading, setIsUploading] = useState(false);

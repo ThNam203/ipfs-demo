@@ -142,6 +142,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		fmt.Printf("saved a file with cid: %s", ipldNode.Cid().String())
+
 		// Gather file information
 		fileSize := fileHeader.Size
 		fileType := fileHeader.Header.Get("Content-Type")
@@ -250,6 +252,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("ipfs node run with id (%s), addr: %v\n", ipfsNode.GetHost().ID(), ipfsNode.GetHost().Addrs())
+	go ipfsNode.Bootstrap(ipfslite.DefaultBootstrapPeers())
 
 	go broadcastFiles()
 
