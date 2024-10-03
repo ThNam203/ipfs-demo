@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	ipfslite "ipfs-demo/ipfs"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
