@@ -23,16 +23,14 @@ import (
 )
 
 type IPFSStorage struct {
-	ipfsApi  iface.CoreAPI
-	node     *core.IpfsNode
-	ctx      context.Context
-	publicIP string
+	ipfsApi iface.CoreAPI
+	node    *core.IpfsNode
+	ctx     context.Context
 }
 
-func NewIPFSStorage(ctx context.Context, publicIP string) *IPFSStorage {
+func NewIPFSStorage(ctx context.Context) *IPFSStorage {
 	ipfsStorage := &IPFSStorage{
-		ctx:      ctx,
-		publicIP: publicIP,
+		ctx: ctx,
 	}
 
 	ipfsStorage.setup()
@@ -89,7 +87,7 @@ func getUnixfsNode(path string) (files.Node, error) {
 	return f, nil
 }
 
-func createIPFSNode(ctx context.Context, publicIP string, repoPath string) (*iface.CoreAPI, *core.IpfsNode, error) {
+func createIPFSNode(ctx context.Context, repoPath string) (*iface.CoreAPI, *core.IpfsNode, error) {
 	repo, err := fsrepo.Open(repoPath)
 	if err != nil {
 		return nil, nil, err
@@ -180,7 +178,7 @@ func (s *IPFSStorage) spawnEphemeral() (*iface.CoreAPI, *core.IpfsNode, error) {
 		return nil, nil, fmt.Errorf("failed to create temp repo: %s", err)
 	}
 
-	api, node, err := createIPFSNode(s.ctx, s.publicIP, repoPath)
+	api, node, err := createIPFSNode(s.ctx, repoPath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create ipfs node: %s", err)
 	}

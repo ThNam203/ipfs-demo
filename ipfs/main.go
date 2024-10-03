@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	ipfslite "ipfs-demo/ipfs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,7 +25,7 @@ type FileInfo struct {
 }
 
 var (
-	ipfsStorage   *IPFSStorage
+	ipfsNode      *ipfslite.Peer
 	upgrader      = websocket.Upgrader{}
 	clients       = make(map[*websocket.Conn]bool) // Connected clients
 	broadcastChan = make(chan FileInfo)            // Channel for broadcasting file info
@@ -128,23 +129,16 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 
 		// Save the file locally
-		filePath := filepath.Join("./uploads", fileHeader.Filename)
-		tempFile, err := os.Create(filePath)
-		if err != nil {
-			http.Error(w, "Error saving file locally", http.StatusInternalServerError)
-			return
-		}
-		defer tempFile.Close()
-
-		// Copy the uploaded file's content to the temporary file
-		_, err = io.Copy(tempFile, file)
-		if err != nil {
-			http.Error(w, "Error copying file", http.StatusInternalServerError)
-			return
-		}
+		// filePath := filepath.Join("./uploads", fileHeader.Filename)
+		// tempFile, err := os.Create(filePath)
+		// if err != nil {
+		// 	http.Error(w, "Error saving file locally", http.StatusInternalServerError)
+		// 	return
+		// }
+		// defer tempFile.Close()
 
 		// Save file to IPFS
-		cid, err := ipfsStorage.Save(filePath)
+		ipldNode, err := ipfsNode.AddFile(r.Context(), file)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error saving file to IPFS: %s", err.Error()), http.StatusInternalServerError)
 			return
@@ -157,7 +151,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		// Create FileInfo struct
 		fileInfo := FileInfo{
 			Filename: fileHeader.Filename,
-			CID:      cid.String(),
+			CID:      ipldNode.Cid().String(),
 			Size:     fileSize,
 			Type:     fileType,
 		}
@@ -165,7 +159,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		fileInfos = append(fileInfos, fileInfo)
 
 		// Log file info to text file
-		if err := logFileInfo(fileHeader.Filename, cid.String(), fileSize, fileType); err != nil {
+		if err := logFileInfo(fileHeader.Filename, ipldNode.Cid().String(), fileSize, fileType); err != nil {
 			fmt.Printf("error while logging file info: %s\n", err.Error())
 			http.Error(w, "Error logging file info", http.StatusInternalServerError)
 			return
@@ -245,8 +239,20 @@ func setUpFolders() {
 func main() {
 	setUpFolders()
 
-	ctx := context.Background()
-	ipfsStorage = NewIPFSStorage(ctx, "123.123.123.123")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ds := ipfslite.NewInMemoryDatastore()
+	host, dht, err := ipfslite.SetupLibp2p(ctx, ds)
+	if err != nil {
+		panic(err)
+	}
+
+	ipfsNode, err = ipfslite.New(ctx, ds, host, dht)
+	if err != nil {
+		panic(err)
+	}
+
 	go broadcastFiles()
 
 	// Set up the HTTP server and upload route

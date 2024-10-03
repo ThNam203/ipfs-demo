@@ -116,43 +116,22 @@ func (p *Peer) Session(ctx context.Context) ipld.NodeGetter {
 	return ng
 }
 
-type AddParams struct {
-	Layout    string
-	Chunker   string
-	RawLeaves bool
-	Hidden    bool
-	Shard     bool
-	NoCopy    bool
-	HashFun   string
-}
-
-func (p *Peer) AddFile(ctx context.Context, r io.Reader, params *AddParams) (ipld.Node, error) {
-	if params == nil {
-		params = &AddParams{}
-	}
-
-	if params.HashFun == "" {
-		params.HashFun = "sha2-256"
-	}
-
+func (p *Peer) AddFile(ctx context.Context, r io.Reader) (ipld.Node, error) {
 	prefix, _ := merkledag.PrefixForCidVersion(1)
 
-	hashFunCode, ok := multihash.Names[strings.ToLower(params.HashFun)]
-	if !ok {
-		return nil, fmt.Errorf("unrecognized hash function: %s", params.HashFun)
-	}
+	hashFunCode, _ := multihash.Names["sha2-256"]
 	prefix.MhType = hashFunCode
 	prefix.MhLength = -1
 
 	dbp := helpers.DagBuilderParams{
 		Dagserv:    p,
-		RawLeaves:  params.RawLeaves,
+		RawLeaves:  true,
 		Maxlinks:   helpers.DefaultLinksPerBlock,
-		NoCopy:     params.NoCopy,
+		NoCopy:     false,
 		CidBuilder: &prefix,
 	}
 
-	chnk, err := chunker.FromString(r, params.Chunker)
+	chnk, err := chunker.FromString(r, "default")
 	if err != nil {
 		return nil, err
 	}
