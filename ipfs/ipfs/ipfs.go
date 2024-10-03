@@ -2,10 +2,8 @@ package ipfslite
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
-	"strings"
 	"sync"
 	"time"
 
