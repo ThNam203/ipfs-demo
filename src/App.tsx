@@ -22,6 +22,8 @@ type UploadedFile = {
     cid: string;
 };
 
+const serverIPv4 = "13.215.163.6"
+
 export default function Component() {
     const [isUploading, setIsUploading] = useState(false);
     const [files, setFiles] = useState<FileItem[]>([]);
@@ -33,7 +35,7 @@ export default function Component() {
         const fetchData = async () => {
             try {
 
-                const response = await fetch("http://18.139.83.35:8000/files");
+                const response = await fetch("http://" + serverIPv4 + ":8000/files");
                 if (response.ok) {
                     try {
                         const data = await response.json();
@@ -54,7 +56,7 @@ export default function Component() {
     }, []);
 
     useEffect(() => {
-        webSocket.current = new WebSocket("ws://18.139.83.35:8000/socket");
+        webSocket.current = new WebSocket("ws://" + serverIPv4 + ":8000/socket");
 
         webSocket.current.onopen = () => {
             console.log("WebSocket connection established.");
@@ -167,7 +169,7 @@ export default function Component() {
 
         try {
             setIsUploading(true);
-            const response = await fetch("http://18.139.83.35:8000/upload", {
+            const response = await fetch("http://" + serverIPv4 + ":8000/upload", {
                 method: "POST",
                 body: formData,
             });
@@ -292,7 +294,7 @@ export default function Component() {
                                     size="icon"
                                     onClick={() => {}}
                                 >
-                                    <a href={`https://ipfs.io/ + ${file.cid}`} download={file.filename}><Download className="h-5 w-5"/></a>
+                                    <a href={`http://${serverIPv4}:8080${file.cid}`} download={file.filename}><Download className="h-5 w-5"/></a>
                                     <span className="sr-only">Download</span>
                                 </Button>
                             </li>
