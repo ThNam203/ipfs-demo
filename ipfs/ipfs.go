@@ -49,6 +49,7 @@ func (s *IPFSStorage) setup() {
 
 	defer log.Println("IPFS node exited")
 	log.Println("IPFS node is running")
+	fmt.Printf("ipfs addresses: %v\n", s.node.PeerHost.Addrs())
 
 	go s.goOnlineIPFSNode()
 }

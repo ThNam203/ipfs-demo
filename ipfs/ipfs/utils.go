@@ -2,7 +2,6 @@ package ipfslite
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -19,6 +18,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/routing"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
+	"github.com/libp2p/go-libp2p/p2p/security/noise"
+	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -67,20 +68,21 @@ func SetupLibp2p(
 
 	addr1, _ := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4001")
 	addr2, _ := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic-v1")
-
 	addrs := []multiaddr.Multiaddr{addr1, addr2}
 
 	opts := []libp2p.Option{
 		libp2p.Identity(priv),
 		libp2p.ListenAddrs(addrs...),
 		libp2p.ConnectionManager(connMgr),
+		libp2p.Security(libp2ptls.ID, libp2ptls.New),
+		libp2p.Security(noise.ID, noise.New),
 		libp2p.DefaultTransports,
-		//libp2p.NATPortMap(),
+		libp2p.NATPortMap(),
 		libp2p.Routing(func(h host.Host) (routing.PeerRouting, error) {
 			ddht, err = newDHT(ctx, h, ds)
 			return ddht, err
 		}),
-		//libp2p.EnableNATService(),
+		libp2p.EnableNATService(),
 	}
 
 	h, err := libp2p.New(opts...)
