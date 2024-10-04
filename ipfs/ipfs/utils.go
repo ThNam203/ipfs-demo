@@ -38,19 +38,6 @@ func NewInMemoryDatastore() datastore.Batching {
 
 var connMgr, _ = connmgr.NewConnManager(100, 600, connmgr.WithGracePeriod(time.Minute))
 
-// SetupLibp2p returns a routed host and DHT instances that can be used to
-// easily create a ipfslite Peer. You may consider to use Peer.Bootstrap()
-// after creating the IPFS-Lite Peer to connect to other peers. When the
-// datastore parameter is nil, the DHT will use an in-memory datastore, so all
-// provider records are lost on program shutdown.
-//
-// Additional libp2p options can be passed. Note that the Identity,
-// ListenAddrs and PrivateNetwork options will be setup automatically.
-// Interesting options to pass: NATPortMap() EnableAutoRelay*(),
-// libp2p.EnableNATService(), DisableRelay(), ConnectionManager(...)... see
-// https://godoc.org/github.com/libp2p/go-libp2p#Option for more info.
-//
-// The secret should be a 32-byte pre-shared-key byte slice.
 func SetupLibp2p(
 	ctx context.Context,
 	ds datastore.Batching,

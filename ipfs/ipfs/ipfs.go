@@ -183,7 +183,6 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) {
 
 	var wg sync.WaitGroup
 	for _, pinfo := range peers {
-		//h.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
 		wg.Add(1)
 		go func(pinfo peer.AddrInfo) {
 			defer wg.Done()
@@ -205,9 +204,6 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) {
 	i := 0
 	for range connected {
 		i++
-	}
-	if nPeers := len(peers); i < nPeers/2 {
-		log.Printf("only connected to %d bootstrap peers out of %d\n", i, nPeers)
 	}
 
 	err := p.dht.Bootstrap(p.ctx)
